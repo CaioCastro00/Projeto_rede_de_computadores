@@ -21,7 +21,7 @@ def handle(client):
     while True:
         try:
             message = client.recv(1024)
-            print(f"{nicknames[client.index(client)]}")
+            print(f"{nicknames[client.index(client)]} says {message}")
             broadcast(message)
         except:
             index = clients.index(client)
@@ -29,7 +29,6 @@ def handle(client):
             client.close()
             nickname = nicknames[index]
             nicknames.remove(nickname)
-
             break
 
 
@@ -37,15 +36,15 @@ def receive():
     while True:
             # accept a client connection
             client, addr = server.accept()
-            print(f"Accepted connection from {addr[0]}:{addr[1]}")
+            print(f"Accepted connection from {str(addr)}")
 
             client.send("<NICK>".encode("utf-8"))
             nickname = client.recv(1024).decode("utf-8")
-            print(f"Client nickname: {nickname}")
-
+           
             nicknames.append(nickname)
             clients.append(client)
 
+            print(f"Client nickname: {nickname}")
             broadcast(f"{nickname} connected to the server.\n".encode("utf-8"))
             client.send("Connected to the server.".encode("utf-8"))
 

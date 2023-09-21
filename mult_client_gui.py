@@ -85,7 +85,7 @@ class Client:
             except ConnectionAbortedError:
                 break
             except Exception as e:
-                print(f"Error when hanlding client: {e}")
+                print(f"Error when handling client: {e}")
                 self.sock.close()
                 break
 
