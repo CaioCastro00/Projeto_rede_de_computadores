@@ -12,17 +12,26 @@ server.listen()
 clients = []
 nicknames = []
 
-def broadcast(message):
+def broadcast(message, sender):
     for client in clients:
-        client.send(message)
-
+        if client != sender:
+            try:
+                client.send(message)
+            except:
+                index = clients.index(client)
+                clients.remove(client)
+                client.close()
+                nickname = nicknames[index]
+                nicknames.remove(nickname)
 
 def handle(client):
     while True:
         try:
             message = client.recv(1024)
-            print(f"{nicknames[client.index(client)]} says {message}")
-            broadcast(message)
+            if not message:
+                break
+            print(f"{nicknames[clients.index(client)]} says: {message.decode('utf-8')}")
+            broadcast(message, client)
         except:
             index = clients.index(client)
             clients.remove(client)
@@ -31,25 +40,28 @@ def handle(client):
             nicknames.remove(nickname)
             break
 
-
 def receive():
     while True:
-            # accept a client connection
-            client, addr = server.accept()
-            print(f"Accepted connection from {str(addr)}")
+        client, addr = server.accept()
+        print(f"Accepted connection from {str(addr)}")
 
-            client.send("<NICK>".encode("utf-8"))
-            nickname = client.recv(1024).decode("utf-8")
-           
-            nicknames.append(nickname)
-            clients.append(client)
+        client.send("<NICK>".encode("utf-8"))
+        nickname = client.recv(1024).decode("utf-8")
 
-            print(f"Client nickname: {nickname}")
-            broadcast(f"{nickname} connected to the server.\n".encode("utf-8"))
-            client.send("Connected to the server.".encode("utf-8"))
+        if nickname in nicknames:
+            client.send("Nickname already in use.".encode("utf-8"))
+            client.close()
+            continue
 
-            thread = threading.Thread(target=handle, args=(client,))
-            thread.start()
+        nicknames.append(nickname)
+        clients.append(client)
 
-print(f"Server running.")
+        print(f"Client nickname: {nickname}")
+        broadcast(f"{nickname} connected to the server.\n".encode("utf-8"), client)
+        client.send("Connected to the server.".encode("utf-8"))
+
+        thread = threading.Thread(target=handle, args=(client,))
+        thread.start()
+
+print("Server running.")
 receive()
