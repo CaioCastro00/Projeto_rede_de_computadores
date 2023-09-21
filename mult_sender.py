@@ -2,10 +2,11 @@ import socket
 
 def run_client():
     # create a socket object
-    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # TCP Socket
 
-    server_ip = "localhost"  # replace with the server's IP address
+    server_ip = "localhost"  # replace with the server's public IP address (go to myip.is in server machine)
     server_port = 9999  # replace with the server's port number
+
     # establish connection with server
     client.connect((server_ip, server_port))
 
@@ -19,8 +20,8 @@ def run_client():
             response = client.recv(1024)
             response = response.decode("utf-8")
 
-            # if server sent us "closed" in the payload, we break out of
-            # the loop and close our socket
+            # if server sent "closed" in the payload, break out of
+            # the loop and close the socket
             if response.lower() == "closed":
                 break
 

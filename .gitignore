@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+
+# Files
+# mult_server_gui.py
+# mult_client_gui.py

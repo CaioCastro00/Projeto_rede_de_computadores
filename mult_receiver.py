@@ -20,11 +20,11 @@ def handle_client(client_socket, addr):
         print(f"Connection to client ({addr[0]}:{addr[1]}) closed")
 
 def run_server():
-    server_ip = "localhost"  # server hostname or IP address
+    server_ip = socket.gethostbyname(socket.gethostname())  # automatic server hostname or IP address (if im VM, input manually)
     port = 9999  # server port number
     # create a socket object
     try:
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # TCP Socket
         # bind the socket to the host and port
         server.bind((server_ip, port))
         # listen for incoming connections
