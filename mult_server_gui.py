@@ -14,7 +14,7 @@ nicknames = []
 
 def broadcast(message, sender):
     for client in clients:
-        if client != sender:
+        # if client != sender:
             try:
                 client.send(message)
             except:
