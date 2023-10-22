@@ -34,3 +34,9 @@
 # Files
 # mult_server_gui.py
 # mult_client_gui.py
+test_client.py
+test_server.py
+receiver.py
+sender.py
+mult_receiver.py
+mult_sender.py
