@@ -38,7 +38,10 @@ test_client.py
 test_server.py
 receiver.py
 sender.py
+server.py
+client.py
 mult_receiver.py
 mult_sender.py
 client_p2p.py
 server_p2p.py
+.gitignore
