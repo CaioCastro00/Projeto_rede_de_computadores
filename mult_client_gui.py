@@ -83,8 +83,12 @@ class Client:
                         self.text_area.config(state='disabled')
             except ConnectionAbortedError:
                 break
+            except ConnectionRefusedError:
+                break
             except Exception as e:
                 print(f"Error when handling client: {e}")
+                self.running = False
+                self.win.destroy()
                 self.sock.close()
                 break
 

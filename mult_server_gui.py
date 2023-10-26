@@ -57,8 +57,6 @@ def start_server():
     print("Server running.\n")
     print(f"Server address: {HOST}\nServer listening in port: {PORT}\n")
 
-    # threading._start_new_thread(receive_clients, (server,))
-
     receive = threading.Thread(target=receive_clients, args=(server,))
     receive.start()
 
@@ -78,20 +76,12 @@ def stop_server():
     lblPort["text"] = "Port: XXXX"
 
     for client in clients:
-        try:
-            index = clients.index(client)
-            nickname = nicknames[index]
-            ip = ips[index]
-            
-            client.send("Server is stopping. Goodbye!".encode("utf-8"))
-            clients.remove(client)
-            client.close()
-            
-            nicknames.remove(nickname)
-            ips.remove(ip)
-            update_client_display(nicknames)
-        except:
-            pass
+        client.close()
+
+    clients.clear()       
+    nicknames.clear()
+    ips.clear()
+    update_client_display(nicknames)
 
     server.close()
     print("Server stopped.\n")
@@ -99,15 +89,14 @@ def stop_server():
 
 def broadcast(message, sender):
     for client in clients:
-        # if client != sender:
-            try:
-                client.send(message)
-            except:
-                index = clients.index(client)
-                clients.remove(client)
-                client.close()
-                nickname = nicknames[index]
-                nicknames.remove(nickname)
+        try:
+            client.send(message)
+        except:
+            index = clients.index(client)
+            clients.remove(client)
+            client.close()
+            nickname = nicknames[index]
+            nicknames.remove(nickname)
 
 
 def handle(client):
