@@ -5,6 +5,8 @@ import tkinter as tk
 HOST = "localhost"
 PORT = 9999
 
+server_running = False
+
 clients = []
 ips = []
 nicknames = []
@@ -41,7 +43,7 @@ clientFrame.pack(side=tk.BOTTOM, pady=(5, 10))
 
 
 def start_server():
-    global server, HOST, PORT
+    global server, HOST, PORT, server_running
     btnStart.config(state=tk.DISABLED)
     btnStop.config(state=tk.NORMAL)
 
@@ -49,6 +51,8 @@ def start_server():
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((HOST, PORT))
     server.listen()
+
+    server_running = True
 
     print("Server running.\n")
     print(f"Server address: {HOST}\nServer listening in port: {PORT}\n")
@@ -63,15 +67,39 @@ def start_server():
 
 
 def stop_server():
-    global server, event
+    global server, clients, server_running
+
+    server_running = False
+
     btnStart.config(state=tk.NORMAL)
     btnStop.config(state=tk.DISABLED)
 
     lblHost["text"] = "Host: X.X.X.X"
     lblPort["text"] = "Port: XXXX"
-        
-    # server.close()
+
+    for client in clients:
+        try:
+            client.send("Server is stopping. Goodbye!".encode("utf-8"))
+            client.close()
+        except:
+            pass
+
+    server.close()
+    # window.destroy()
     print("Server stopped.\n")
+
+
+# def stop_server():
+#     global server, event
+
+#     btnStart.config(state=tk.NORMAL)
+#     btnStop.config(state=tk.DISABLED)
+
+#     lblHost["text"] = "Host: X.X.X.X"
+#     lblPort["text"] = "Port: XXXX"    
+        
+#     # server.close()
+#     print("Server stopped.\n")
 
 
 def broadcast(message, sender):
@@ -130,33 +158,41 @@ def handle(client):
 
 
 def receive_clients(server,):
+
+    global server_running
  
-    while True:
+    while server_running:
 
-        client, addr = server.accept()
-        ip = addr[0]
-        print(f"Accepted connection from {str(addr)}")
+        try:
+            client, addr = server.accept()
+            ip = addr[0]
+            print(f"Accepted connection from {str(addr)}")
 
-        client.send("<NICK>".encode("utf-8"))
-        nickname = client.recv(1024).decode("utf-8")
+            client.send("<NICK>".encode("utf-8"))
+            nickname = client.recv(1024).decode("utf-8")
 
-        if nickname in nicknames:
-            client.send("Nickname already in use.".encode("utf-8"))
-            client.close()
-            continue
-        
-        ips.append(ip)
-        nicknames.append(nickname)
-        clients.append(client)
+            if nickname in nicknames:
+                client.send("Nickname already in use.".encode("utf-8"))
+                client.close()
+                continue
+            
+            ips.append(ip)
+            nicknames.append(nickname)
+            clients.append(client)
 
-        print(f"Client nickname: {nickname}")
-        broadcast(f"{nickname} connected to the server.\n".encode("utf-8"), client)
-        client.send("Connected to the server.".encode("utf-8"))
+            print(f"Client nickname: {nickname}")
+            broadcast(f"{nickname} connected to the server.\n".encode("utf-8"), client)
+            client.send("Connected to the server.".encode("utf-8"))
 
-        update_client_display(nicknames)
+            update_client_display(nicknames)
 
-        thread = threading.Thread(target=handle, args=(client,))
-        thread.start()
+            thread = threading.Thread(target=handle, args=(client,))
+            thread.start()
+
+        except socket.error as e:
+            if not server_running:
+                break
+            print(f"Socket error: {e}")
 
 
 def update_client_display(nick_list):
