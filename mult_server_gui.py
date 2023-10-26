@@ -79,27 +79,22 @@ def stop_server():
 
     for client in clients:
         try:
+            index = clients.index(client)
+            nickname = nicknames[index]
+            ip = ips[index]
+            
             client.send("Server is stopping. Goodbye!".encode("utf-8"))
+            clients.remove(client)
             client.close()
+            
+            nicknames.remove(nickname)
+            ips.remove(ip)
+            update_client_display(nicknames)
         except:
             pass
 
     server.close()
-    # window.destroy()
     print("Server stopped.\n")
-
-
-# def stop_server():
-#     global server, event
-
-#     btnStart.config(state=tk.NORMAL)
-#     btnStop.config(state=tk.DISABLED)
-
-#     lblHost["text"] = "Host: X.X.X.X"
-#     lblPort["text"] = "Port: XXXX"    
-        
-#     # server.close()
-#     print("Server stopped.\n")
 
 
 def broadcast(message, sender):
