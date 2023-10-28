@@ -59,6 +59,8 @@ class Client:
 
         # message = f"{self.nickname}: {self.input_area.get('1.0', 'end')}"
         message = f"{self.input_area.get('1.0', 'end')}"
+        if message.rstrip() == f":D":
+            message = message.rstrip()
         msg_len = len(message)
         send_len = str(msg_len).encode("utf-8")
         send_len += b' ' * (HEADER - len(send_len))
@@ -67,11 +69,8 @@ class Client:
         self.sock.send(message.encode("utf-8"))
         print(message)
         # if message.rstrip() == f"{self.nickname}: :D":
-        if message.rstrip() == f":D":
-            self.running = False
-            self.win.destroy()
-            self.sock.close()
-            exit(0)
+        if message == f":D":
+            self.stop()
         self.input_area.delete('1.0', 'end')
 
     def stop(self):
