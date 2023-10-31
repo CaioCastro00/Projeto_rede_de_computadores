@@ -5,10 +5,9 @@ import tkinter.scrolledtext
 from tkinter import simpledialog
 
 HOST = 'localhost'
-PORT = 9999
+PORT = 18000
 HEADER = 64
 FORMAT ='utf-8'
-# DISCONNECT_MESSAGE = '!DISCONNECT'
 
 class Client:
 
@@ -34,11 +33,11 @@ class Client:
         self.win = tkinter.Tk()
         self.win.title("Chat Client")
 
-        # self.chat_label = tkinter.Label(self.win, text="Chat:")
-        # self.chat_label.pack()
+        self.chat_label = tkinter.Label(self.win, text="Chat:")
+        self.chat_label.pack()
 
-        # self.text_area = tkinter.scrolledtext.ScrolledText(self.win)
-        # self.text_area.pack()
+        self.text_area = tkinter.scrolledtext.ScrolledText(self.win)
+        self.text_area.pack()
 
         self.msg_label = tkinter.Label(self.win, text="Message:")
         self.msg_label.pack()
@@ -66,7 +65,7 @@ class Client:
         send_len += b' ' * (HEADER - len(send_len))
 
         self.sock.send(send_len)
-        self.sock.send(message.encode("utf-8"))
+        self.sock.send(message.strip().encode("utf-8"))
         print(message)
         # if message.rstrip() == f"{self.nickname}: :D":
         if message == f":D":
@@ -87,11 +86,11 @@ class Client:
                 # if message == "<NICK>":
                 #     self.sock.send(self.nickname.encode("utf-8"))
                 # else:
-                # if self.gui_done:
-                #     self.text_area.config(state='normal')
-                #     self.text_area.insert('end', message + '\n')
-                #     self.text_area.yview('end')
-                #     self.text_area.config(state='disabled')
+                if self.gui_done:
+                    self.text_area.config(state='normal')
+                    self.text_area.insert('end', message + '\n')
+                    self.text_area.yview('end')
+                    self.text_area.config(state='disabled')
             except ConnectionAbortedError:
                 break
             except ConnectionRefusedError:
