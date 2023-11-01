@@ -2,7 +2,6 @@ import socket
 import threading
 import tkinter
 import tkinter.scrolledtext
-from tkinter import simpledialog
 
 HOST = 'localhost'
 PORT = 18000
@@ -12,13 +11,11 @@ FORMAT ='utf-8'
 class Client:
 
     def __init__(self, host, port):
+        self.host = host
+        self.port = port
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.connect((host, port))
-
-        # msg = tkinter.Tk()
-        # msg.withdraw()
-
-        # self.nickname = simpledialog.askstring("Nickname", "Please choose a nickname:", parent=msg)
 
         self.gui_done = False
         self.running = True
@@ -33,44 +30,67 @@ class Client:
         self.win = tkinter.Tk()
         self.win.title("Chat Client")
 
-        self.chat_label = tkinter.Label(self.win, text="Chat:")
-        self.chat_label.pack()
+        # Host and Port info
+        self.topFrame = tkinter.Frame(self.win)
+        self.lblHost = tkinter.Label(self.topFrame, text = "Host: " + self.host)
+        self.lblHost.pack(side=tkinter.LEFT)
+        self.lblPort = tkinter.Label(self.topFrame, text = "Port: " + str(self.port))
+        self.lblPort.pack(side=tkinter.LEFT)
+        self.topFrame.pack(side=tkinter.TOP, pady=(5, 0))
 
-        self.text_area = tkinter.scrolledtext.ScrolledText(self.win)
-        self.text_area.pack()
+        # Disconnect button
+        self.middleFrame = tkinter.Frame(self.win)
+        self.btnStop = tkinter.Button(self.middleFrame, text="Disconnect", command=lambda : self.disconnect())
+        self.btnStop.pack(side=tkinter.LEFT)
+        self.middleFrame.pack(side=tkinter.TOP, pady=(5, 0))
 
+        # Chat window
+        self.chatLabel = tkinter.Label(self.win, text="Chat:")
+        self.chatLabel.pack()
+        self.textArea = tkinter.scrolledtext.ScrolledText(self.win)
+        self.textArea.pack()
+
+        # Input area
         self.msg_label = tkinter.Label(self.win, text="Message:")
-        self.msg_label.pack()
-
-        self.input_area = tkinter.Text(self.win, height=3)
-        self.input_area.pack()
-
-        self.send_button = tkinter.Button(self.win, text="Send", command=self.write)
-        self.send_button.pack()
+        self.msg_label.pack()       
+        self.inputArea = tkinter.Text(self.win, height=3)
+        self.inputArea.pack()
+        self.sendButton = tkinter.Button(self.win, text="Send", command=self.write)
+        self.win.bind('<Return>', self.write)
+        self.sendButton.pack()
 
         self.gui_done = True
 
-        self.win.protocol("WM_DELETE_WINDOW", self.stop)
+        self.win.protocol("WM_DELETE_WINDOW", self.disconnect)
 
         self.win.mainloop()
-
-    def write(self):
-
-        # message = f"{self.nickname}: {self.input_area.get('1.0', 'end')}"
-        message = f"{self.input_area.get('1.0', 'end')}"
-        if message.rstrip() == f":D":
-            message = message.rstrip()
+            
+    def disconnect(self):
+        message = f":D".rstrip()
         msg_len = len(message)
         send_len = str(msg_len).encode("utf-8")
         send_len += b' ' * (HEADER - len(send_len))
-
         self.sock.send(send_len)
         self.sock.send(message.strip().encode("utf-8"))
-        print(message)
-        # if message.rstrip() == f"{self.nickname}: :D":
+        self.stop()
+        pass
+
+    def write(self, event):
+
+        message = f"{self.inputArea.get('1.0', 'end')}"
+        if message.rstrip() != f"":
+            if message.rstrip() == f":D":
+                message = message.rstrip()
+            msg_len = len(message)
+            send_len = str(msg_len).encode("utf-8")
+            send_len += b' ' * (HEADER - len(send_len))
+
+            self.sock.send(send_len)
+            self.sock.send(message.strip().encode("utf-8"))
+
         if message == f":D":
             self.stop()
-        self.input_area.delete('1.0', 'end')
+        self.inputArea.delete('1.0', 'end')
 
     def stop(self):
         self.running = False
@@ -82,15 +102,11 @@ class Client:
         while self.running:
             try:
                 message = self.sock.recv(1024).decode("utf-8")
-                # print(message)
-                # if message == "<NICK>":
-                #     self.sock.send(self.nickname.encode("utf-8"))
-                # else:
                 if self.gui_done:
-                    self.text_area.config(state='normal')
-                    self.text_area.insert('end', message + '\n')
-                    self.text_area.yview('end')
-                    self.text_area.config(state='disabled')
+                    self.textArea.config(state='normal')
+                    self.textArea.insert('end', message + '\n')
+                    self.textArea.yview('end')
+                    self.textArea.config(state='disabled')
             except ConnectionAbortedError:
                 break
             except ConnectionRefusedError:
