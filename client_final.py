@@ -75,7 +75,7 @@ class Client:
         self.stop()
         pass
 
-    def write(self, event):
+    def write(self, event='<Return>'):
 
         message = f"{self.inputArea.get('1.0', 'end')}"
         if message.rstrip() != f"":
